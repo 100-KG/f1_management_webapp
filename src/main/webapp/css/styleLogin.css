@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+.page-center {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #999999;
+    padding: 24px 32px;
+    width: 320px;
+    box-sizing: border-box;
+}
+
+.card-title {
+    text-align: center;
+    margin: 0 0 20px 0;
+    font-size: 20px;
+}
+
+.form-row {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row label {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.form-row input {
+    padding: 6px 8px;
+    border: 1px solid #000000;
+    outline: none;
+}
+
+.btn {
+    width: 100%;
+    padding: 8px 0;
+    border: none;
+    margin-top: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-login,
+.btn-viewRanking {
+    background-color: #c3d8f0; 
+    color: #ffffff;
+}

@@ -1,0 +1,549 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "Script",
+    "content": "CREATE DATABASE f1_management;\nUSE f1_management;\n\n-- Drop tables in reverse order\nDROP TABLE IF EXISTS tblGPinSeason;\nDROP TABLE IF EXISTS tblResult;\nDROP TABLE IF EXISTS tblContract;\nDROP TABLE IF EXISTS tblSchedule;\nDROP TABLE IF EXISTS tblGrandPrix;\nDROP TABLE IF EXISTS tblSeason;\nDROP TABLE IF EXISTS tblMember;\nDROP TABLE IF EXISTS tblDriver;\nDROP TABLE IF EXISTS tblTeam;\n\n-- ======================\n-- CREATE TABLES\n-- ======================\n\nCREATE TABLE tblTeam (\n    id          INT PRIMARY KEY,\n    name        VARCHAR(255) NOT NULL,\n    owner       VARCHAR(50)\n);\n\nCREATE TABLE tblDriver (\n    id           INT PRIMARY KEY,\n    fullname     VARCHAR(255) NOT NULL,\n    dob          DATE,\n    nationality  VARCHAR(255)\n);\n\nCREATE TABLE tblMember (\n    id         INT PRIMARY KEY,\n    username   VARCHAR(50) NOT NULL UNIQUE,\n    password   VARCHAR(50) NOT NULL,\n    fullname   VARCHAR(255)\n);\n\nCREATE TABLE tblSeason (\n    id    INT PRIMARY KEY,\n    year  INT NOT NULL UNIQUE\n);\n\nCREATE TABLE tblGrandPrix (\n    id       INT AUTO_INCREMENT PRIMARY KEY,\n    country  VARCHAR(255) NOT NULL,\n    curcuit  VARCHAR(255) NOT NULL,\n    length   FLOAT(10),\n    laps     INT\n);\n\nCREATE TABLE tblSchedule (\n    id         INT PRIMARY KEY,\n    date       DATE NOT NULL,\n    purpose    VARCHAR(255) NOT NULL,\n    startTime  TIME NOT NULL\n);\n\nCREATE TABLE tblContract (\n    id         INT PRIMARY KEY,\n    driverId   INT NOT NULL,\n    teamId     INT NOT NULL,\n    CONSTRAINT fk_contract_driver FOREIGN KEY (driverId) REFERENCES tblDriver(id),\n    CONSTRAINT fk_contract_team   FOREIGN KEY (teamId)   REFERENCES tblTeam(id)\n);\n\nCREATE TABLE tblResult (\n    id            INT PRIMARY KEY,\n    time          TIME,\n    lapfinished   INT,\n    position      INT,\n    point         INT,\n    contractId    INT NOT NULL,\n    memberId      INT NOT NULL,\n    CONSTRAINT fk_result_contract FOREIGN KEY (contractId) REFERENCES tblContract(id),\n    CONSTRAINT fk_result_member   FOREIGN KEY (memberId)   REFERENCES tblMember(id)\n);\n\nCREATE TABLE tblGPinSeason (\n    id           INT PRIMARY KEY,\n    resultId     INT NOT NULL,\n    seasonId     INT NOT NULL,\n    grandPrixId  INT NOT NULL,\n    scheduleId   INT NOT NULL,\n    CONSTRAINT fk_gps_result    FOREIGN KEY (resultId)    REFERENCES tblResult(id),\n    CONSTRAINT fk_gps_season    FOREIGN KEY (seasonId)    REFERENCES tblSeason(id),\n    CONSTRAINT fk_gps_grandprix FOREIGN KEY (grandPrixId) REFERENCES tblGrandPrix(id),\n    CONSTRAINT fk_gps_schedule  FOREIGN KEY (scheduleId)  REFERENCES tblSchedule(id)\n);\n\n-- ======================\n-- INSERT DATA\n-- ======================\n\n-- Teams\nINSERT INTO tblTeam VALUES\n(1, 'Mercedes AMG Petronas', 'Toto Wolff'),\n(2, 'Red Bull Racing',       'Christian Horner'),\n(3, 'Ferrari',               'John Elkann'),\n(4, 'McLaren F1 Team',       'Zak Brown'),\n(5, 'Aston Martin',          'Lawrence Stroll');\n\n-- Drivers\nINSERT INTO tblDriver VALUES\n(1, 'Lewis Hamilton', '1985-01-07', 'British'),\n(2, 'George Russell', '1998-02-15', 'British'),\n(3, 'Max Verstappen', '1997-09-30', 'Dutch'),\n(4, 'Sergio Perez',   '1990-01-26', 'Mexican'),\n(5, 'Charles Leclerc','1997-10-16','Monégasque'),\n(6, 'Carlos Sainz',   '1994-09-01','Spanish'),\n(7, 'Lando Norris',   '1999-11-13','British'),\n(8, 'Oscar Piastri',  '2001-04-06','Australian'),\n(9, 'Fernando Alonso','1981-07-29','Spanish'),\n(10,'Lance Stroll',   '1998-10-29','Canadian');\n\n-- Members\nINSERT INTO tblMember VALUES\n(1, 'admin', '123456', 'System Admin'),\n(2, 'staff01', '123456', 'Race Staff A'),\n(3, 'staff02', '123456', 'Race Staff B');\n\n-- Seasons\nINSERT INTO tblSeason VALUES\n(1, 2023),\n(2, 2024);\n\n-- Grand Prix\nINSERT INTO tblGrandPrix (country, curcuit, length, laps) VALUES\n('Bahrain', 'Bahrain International Circuit', 5.412, 57),\n('Saudi Arabia', 'Jeddah Corniche Circuit', 6.174, 50),\n('Australia', 'Albert Park Circuit', 5.278, 58),\n('Azerbaijan', 'Baku City Circuit', 6.003, 51),\n('Monaco', 'Circuit de Monaco', 3.337, 78);\n\n-- Schedule: Practice – Qualify – Race for 5 GP\nINSERT INTO tblSchedule VALUES\n(1, '2024-02-29', 'Practice',  '16:00:00'),\n(2, '2024-03-01', 'Qualify',   '18:00:00'),\n(3, '2024-03-02', 'Race Day',  '18:00:00'),\n\n(4, '2024-03-07', 'Practice',  '17:00:00'),\n(5, '2024-03-08', 'Qualify',   '19:00:00'),\n(6, '2024-03-09', 'Race Day',  '20:00:00'),\n\n(7, '2024-03-22', 'Practice',  '13:00:00'),\n(8, '2024-03-23', 'Qualify',   '14:00:00'),\n(9, '2024-03-24', 'Race Day',  '14:00:00'),\n\n(10, '2024-04-26', 'Practice',  '15:00:00'),\n(11, '2024-04-27', 'Qualify',   '16:00:00'),\n(12, '2024-04-28', 'Race Day',  '16:00:00'),\n\n(13, '2024-05-24', 'Practice',  '14:00:00'),\n(14, '2024-05-25', 'Qualify',   '15:00:00'),\n(15, '2024-05-26', 'Race Day',  '15:00:00');\n\n-- Contracts\nINSERT INTO tblContract VALUES\n(1, 1, 1),\n(2, 2, 1),\n(3, 3, 2),\n(4, 4, 2),\n(5, 5, 3),\n(6, 6, 3),\n(7, 7, 4),\n(8, 8, 4),\n(9, 9, 5),\n(10, 10, 5);\n\n-- ======================\n-- RACE RESULTS (5 GP × 10 driver)\n-- ======================\n\n-- Bahrain (Race scheduleId = 3, GP=1)\nINSERT INTO tblResult VALUES\n(1, '01:33:45', 57, 1, 25, 3, 1),\n(2, '01:34:12', 57, 2, 18, 5, 1),\n(3, '01:34:20', 57, 3, 15, 7, 2),\n(4, '01:34:40', 57, 4, 12, 4, 3),\n(5, '01:35:00', 57, 5, 10, 1, 2);\n\n-- Saudi Arabia (scheduleId = 6, GP=2)\nINSERT INTO tblResult VALUES\n(6, '01:28:40', 50, 1, 25, 3, 1),\n(7, '01:29:00', 50, 2, 18, 7, 2),\n(8, '01:29:10', 50, 3, 15, 5, 1),\n(9, '01:29:35', 50, 4, 12, 4, 3),\n(10,'01:30:00', 50, 5, 10, 1, 2),\n(11,'01:30:30', 50, 6, 8, 2, 3),\n(12,'01:30:50', 50, 7, 6, 6, 2),\n(13,'01:31:10', 50, 8, 4, 8, 1),\n(14,'01:31:40', 50, 9, 2, 9, 1),\n(15,'01:32:05', 50,10, 1,10, 3);\n\n-- Australia (scheduleId = 9, GP=3)\nINSERT INTO tblResult VALUES\n(16,'01:32:12', 58, 1, 25, 3, 1),\n(17,'01:32:44', 58, 2, 18, 5, 1),\n(18,'01:33:01', 58, 3, 15, 7, 2),\n(19,'01:33:20', 58, 4, 12, 4, 3),\n(20,'01:33:40', 58, 5, 10, 1, 2),\n(21,'01:34:00', 58, 6, 8,  6, 2),\n(22,'01:34:10', 58, 7, 6,  2, 3),\n(23,'01:34:33', 58, 8, 4,  8, 1),\n(24,'01:34:59', 58, 9, 2,  9, 1),\n(25,'01:35:21', 58, 10,1, 10, 3);\n\n-- Baku (scheduleId = 12, GP=4)\nINSERT INTO tblResult VALUES\n(26,'01:42:11', 51, 1, 25, 3, 1),\n(27,'01:42:40', 51, 2, 18, 4, 3),\n(28,'01:43:00', 51, 3, 15, 5, 1),\n(29,'01:43:15', 51, 4, 12, 7, 2),\n(30,'01:43:40', 51, 5, 10, 8, 1),\n(31,'01:44:00', 51, 6, 8,  1, 2),\n(32,'01:44:20', 51, 7, 6,  6, 2),\n(33,'01:44:55', 51, 8, 4,  2, 3),\n(34,'01:45:15', 51, 9, 2,  9, 1),\n(35,'01:45:30', 51,10, 1, 10, 3);\n\n-- Monaco (scheduleId = 15, GP=5)\nINSERT INTO tblResult VALUES\n(36,'01:47:31', 78, 1, 25, 5, 1),\n(37,'01:48:02', 78, 2, 18, 3, 1),\n(38,'01:48:33', 78, 3, 15, 7, 2),\n(39,'01:48:55', 78, 4, 12, 4, 3),\n(40,'01:49:10', 78, 5, 10, 1, 2),\n(41,'01:49:35', 78, 6, 8,  6, 2),\n(42,'01:49:55', 78, 7, 6,  8, 1),\n(43,'01:50:18', 78, 8, 4,  2, 3),\n(44,'01:50:49', 78, 9, 2,  9, 1),\n(45,'01:51:15', 78,10, 1, 10, 3);\n\n-- ======================\n-- INSERT GPinSeason (Race only)\n-- ======================\n\nINSERT INTO tblGPinSeason VALUES\n-- Bahrain (scheduleId=3)\n(1,1,2,1,3),(2,2,2,1,3),(3,3,2,1,3),(4,4,2,1,3),(5,5,2,1,3),\n\n-- Saudi Arabia (scheduleId=6)\n(6,6,2,2,6),(7,7,2,2,6),(8,8,2,2,6),(9,9,2,2,6),(10,10,2,2,6),\n(11,11,2,2,6),(12,12,2,2,6),(13,13,2,2,6),(14,14,2,2,6),(15,15,2,2,6),\n\n-- Australia (scheduleId=9)\n(16,16,2,3,9),(17,17,2,3,9),(18,18,2,3,9),(19,19,2,3,9),(20,20,2,3,9),\n(21,21,2,3,9),(22,22,2,3,9),(23,23,2,3,9),(24,24,2,3,9),(25,25,2,3,9),\n\n-- Baku (scheduleId=12)\n(26,26,2,4,12),(27,27,2,4,12),(28,28,2,4,12),(29,29,2,4,12),(30,30,2,4,12),\n(31,31,2,4,12),(32,32,2,4,12),(33,33,2,4,12),(34,34,2,4,12),(35,35,2,4,12),\n\n-- Monaco (scheduleId=15)\n(36,36,2,5,15),(37,37,2,5,15),(38,38,2,5,15),(39,39,2,5,15),(40,40,2,5,15),\n(41,41,2,5,15),(42,42,2,5,15),(43,43,2,5,15),(44,44,2,5,15),(45,45,2,5,15);\n\n\n\n",
+    "options": {
+        "tabSize": 4,
+        "indentSize": 4,
+        "insertSpaces": true,
+        "defaultEOL": "LF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": false,
+                "selectionStart": {
+                    "lineNumber": 3,
+                    "column": 1
+                },
+                "position": {
+                    "lineNumber": 3,
+                    "column": 1
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 1,
+                "column": 1
+            },
+            "firstPositionDeltaTop": 0
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 258,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "c0e4cc93-879b-4145-e7b1-3d7b02fc7aa6",
+                            "content": "OK, 1 row affected in 16.78ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "19b02d90-5ab9-4430-bf45-7650468a5d22",
+                            "content": "OK, 0 records retrieved in 1.426ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 2,
+                            "resultId": "d1b020af-c232-43d8-80ec-d9e82ab7e431",
+                            "content": "OK, 0 records retrieved in 7.196ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 3,
+                            "resultId": "113df668-3002-436e-f307-853c3a657e8a",
+                            "content": "OK, 0 records retrieved in 3.362ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 4,
+                            "resultId": "90a179ec-cd2c-44fa-99da-9c74866647e8",
+                            "content": "OK, 0 records retrieved in 3.826ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 5,
+                            "resultId": "e089ef2e-f95b-4c45-fc2e-397647e05ad7",
+                            "content": "OK, 0 records retrieved in 4.042ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 6,
+                            "resultId": "2c42d52a-8bf3-4a89-aaad-835b26e338a1",
+                            "content": "OK, 0 records retrieved in 3.729ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 7,
+                            "resultId": "15db3cf3-8270-4761-b58f-4a5c20a0bb47",
+                            "content": "OK, 0 records retrieved in 4.296ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 8,
+                            "resultId": "6d406b99-e571-4380-f88a-39352c2461f0",
+                            "content": "OK, 0 records retrieved in 3.1ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 9,
+                            "resultId": "706bed01-3bb4-4a92-fded-1a04d31d07c2",
+                            "content": "OK, 0 records retrieved in 4.259ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 10,
+                            "resultId": "0806f5f3-a9c7-49f9-c929-4d5004708de4",
+                            "content": "OK, 0 records retrieved in 3.285ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 11,
+                            "resultId": "400f135a-7169-4795-9882-561a2622dfa5",
+                            "content": "OK, 0 records retrieved in 39.277ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 12,
+                            "resultId": "1418a417-fe03-4765-8148-c9be258ad651",
+                            "content": "OK, 0 records retrieved in 22.983ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 13,
+                            "resultId": "53ce990f-ee81-42c0-8e99-33a7635228d5",
+                            "content": "OK, 0 records retrieved in 51.441ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 14,
+                            "resultId": "9ef32fc6-7028-47fd-8e51-3c95b1f62ca2",
+                            "content": "OK, 0 records retrieved in 40.863ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 15,
+                            "resultId": "6d979118-4789-4e95-93f5-46748498df09",
+                            "content": "OK, 0 records retrieved in 32.445ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 16,
+                            "resultId": "1c40d8a3-5541-4582-ed6f-c47840fd0b48",
+                            "content": "OK, 0 records retrieved in 24.495ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 17,
+                            "resultId": "7ecefec0-c72a-4353-eed7-42d27449caa1",
+                            "content": "OK, 0 records retrieved in 58.526ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 18,
+                            "resultId": "fdb1697e-831d-413b-9da4-3c235efb6d74",
+                            "content": "OK, 0 records retrieved in 53.254ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 19,
+                            "resultId": "ffa1ff5a-9042-4fb1-ec20-bd1cbf2b55fa",
+                            "content": "OK, 0 records retrieved in 75.525ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 20,
+                            "resultId": "87c0c7c0-c20d-431a-ce10-4d63f3a94592",
+                            "content": "OK, 5 rows affected in 14.382ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 21,
+                            "resultId": "44f48819-ead5-450d-89cc-adc04893b8f6",
+                            "content": "OK, 10 rows affected in 6.943ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 22,
+                            "resultId": "8792b0c2-3685-4e94-ed69-6be12cc8fb72",
+                            "content": "OK, 3 rows affected in 8.991ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 23,
+                            "resultId": "e6f4d529-6f66-4453-b87c-6faabbfa8dc8",
+                            "content": "OK, 2 rows affected in 6.391ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 30
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 30,
+                            "length": 19
+                        },
+                        "contentStart": 31,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 49,
+                            "length": 69
+                        },
+                        "contentStart": 84,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 118,
+                            "length": 32
+                        },
+                        "contentStart": 120,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 150,
+                            "length": 34
+                        },
+                        "contentStart": 152,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 184,
+                            "length": 34
+                        },
+                        "contentStart": 186,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 218,
+                            "length": 35
+                        },
+                        "contentStart": 220,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 253,
+                            "length": 32
+                        },
+                        "contentStart": 255,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 285,
+                            "length": 32
+                        },
+                        "contentStart": 287,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 317,
+                            "length": 32
+                        },
+                        "contentStart": 319,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 349,
+                            "length": 30
+                        },
+                        "contentStart": 351,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 379,
+                            "length": 197
+                        },
+                        "contentStart": 451,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 576,
+                            "length": 156
+                        },
+                        "contentStart": 578,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 732,
+                            "length": 170
+                        },
+                        "contentStart": 734,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 902,
+                            "length": 86
+                        },
+                        "contentStart": 904,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 988,
+                            "length": 190
+                        },
+                        "contentStart": 990,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1178,
+                            "length": 160
+                        },
+                        "contentStart": 1180,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1338,
+                            "length": 284
+                        },
+                        "contentStart": 1340,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1622,
+                            "length": 392
+                        },
+                        "contentStart": 1624,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2014,
+                            "length": 531
+                        },
+                        "contentStart": 2016,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2545,
+                            "length": 336
+                        },
+                        "contentStart": 2624,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2881,
+                            "length": 520
+                        },
+                        "contentStart": 2894,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3401,
+                            "length": 165
+                        },
+                        "contentStart": 3414,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3566,
+                            "length": 63
+                        },
+                        "contentStart": 3579,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3629,
+                            "length": 334
+                        },
+                        "contentStart": 3645,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3963,
+                            "length": 750
+                        },
+                        "contentStart": 4013,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 4713,
+                            "length": 157
+                        },
+                        "contentStart": 4728,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 4870,
+                            "length": 327
+                        },
+                        "contentStart": 4999,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 5197,
+                            "length": 404
+                        },
+                        "contentStart": 5238,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 5601,
+                            "length": 406
+                        },
+                        "contentStart": 5639,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 6007,
+                            "length": 402
+                        },
+                        "contentStart": 6041,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 6409,
+                            "length": 404
+                        },
+                        "contentStart": 6445,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 6813,
+                            "length": 900
+                        },
+                        "contentStart": 6901,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 7713,
+                            "length": 2
+                        },
+                        "contentStart": 7712,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 259,
+                "end": 259,
+                "language": "mysql",
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 260,
+                "end": 260,
+                "language": "mysql",
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}

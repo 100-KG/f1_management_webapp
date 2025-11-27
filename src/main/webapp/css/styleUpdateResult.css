@@ -1,0 +1,31 @@
+body {
+    display:flex; justify-content:center; align-items:center;
+    background:white; height:100vh; font-family:Arial;
+}
+
+.container {
+    border:2px solid black; width:800px; padding:30px; text-align:center;
+}
+
+.gp-dropdown {
+    width:300px; font-size:16px; padding:10px;
+    margin-bottom:20px; border:2px solid black; border-radius:4px;
+}
+
+.result-table {
+    width:100%; border-collapse:collapse; margin-top:10px;
+}
+
+.result-table th {
+    background:#e9e9e9; padding:8px; border:1px solid #ddd;
+}
+.result-table td { border:1px solid #ddd; padding:6px; }
+
+.actions{ margin-top:25px; display:flex; justify-content:space-around; }
+
+.btn-save,.btn-back{
+    width:150px; padding:10px; background:#c7d8e8;
+    border:none; font-size:16px; cursor:pointer; border-radius:4px;
+}
+.btn-back{text-decoration:none; display:inline-block; text-align:center;}
+.btn-save:hover,.btn-back:hover{background:#a9c6df;}
