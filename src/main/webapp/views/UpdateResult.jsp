@@ -56,14 +56,15 @@
         </tr>
 
         <% if(results == null) { %>
+            
     <% for(int i=0;i<20;i++){ %>
         <tr>
             <td>—</td>
             <td>—</td>
-            <td><input type="number" name="point_<%=i%>" value=""></td>
-            <td><input type="text"   name="time_<%=i%>" value=""></td>
-            <td><input type="number" name="laps_<%=i%>" value=""></td>
-            <td><input type="number" name="pos_<%=i%>" value=""></td>
+            <td><input type="text" name="point_<%=i%>" value="" required></td>
+            <td><input type="text" name="time_<%=i%>" value="" required></td>
+            <td><input type="text" name="laps_<%=i%>" value="" required></td>
+            <td><input type="text" name="pos_<%=i%>" value="" required></td>
         </tr>
     <% } %>
 
@@ -74,12 +75,12 @@
             <td><%= r.getDriver() %></td>
             <td><%= r.getTeam() %></td>
 
-            <td><input type="number" name="point_<%=i%>" value="<%=r.getPoint()%>"></td>
-            <td><input type="text" name="time_<%=i%>" value="<%=r.getTime()%>"></td>
-            <td><input type="number" name="laps_<%=i%>" value="<%=r.getLapFinished()%>"></td>
-            <td><input type="number" name="pos_<%=i%>" value="<%=r.getPosition()%>"></td>
+            <td><input type="text" name="point_<%=i%>" value="<%=r.getPoint()%>" required pattern="^(25|18|15|12|10|8|6|4|2|1|0)$"></td>
+            <td><input type="text" name="time_<%=i%>" value="<%=r.getTime()%>" required pattern="^[0-9]{1,2}:[0-5][0-9]:[0-5][0-9]$"></td>
+            <td><input type="text" name="laps_<%=i%>" value="<%=r.getLapFinished()%>" required pattern="^[0-9]{1,3}$"></td>
+            <td><input type="text" name="pos_<%=i%>" value="<%=r.getPosition()%>" required pattern="^(?:[1-9]|1[0-9]|20)$"></td>
 
-            <input type="hidden" name="rid_<%=i%>" value="<%=r.getId()%>">
+            <input type="hidden" name="rid_<%=i%>" value="<%=r.getId()%>" >
         </tr>
     <% } %>
 

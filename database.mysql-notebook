@@ -2,7 +2,7 @@
     "type": "MySQLNotebook",
     "version": "1.0",
     "caption": "Script",
-    "content": "CREATE DATABASE f1_management;\nUSE f1_management;\n\n-- =======================\n-- DROP TABLES (REBUILD)\n-- =======================\nDROP TABLE IF EXISTS tblResult;\nDROP TABLE IF EXISTS tblContract;\nDROP TABLE IF EXISTS tblGPinSeason;\nDROP TABLE IF EXISTS tblSchedule;\nDROP TABLE IF EXISTS tblGrandPrix;\nDROP TABLE IF EXISTS tblSeason;\nDROP TABLE IF EXISTS tblMember;\nDROP TABLE IF EXISTS tblDriver;\nDROP TABLE IF EXISTS tblTeam;\n\n-- =======================\n-- BASE TABLE STRUCTURE\n-- =======================\n\nCREATE TABLE tblTeam(\n    id INT PRIMARY KEY,\n    name VARCHAR(255),\n    owner VARCHAR(100)\n);\n\nCREATE TABLE tblDriver(\n    id INT PRIMARY KEY,\n    fullname VARCHAR(255),\n    dob DATE,\n    nationality VARCHAR(100)\n);\n\nCREATE TABLE tblMember(\n    id INT PRIMARY KEY,\n    username VARCHAR(50) UNIQUE,\n    password VARCHAR(50),\n    fullname VARCHAR(255)\n);\n\nCREATE TABLE tblSeason(\n    id INT PRIMARY KEY,\n    year INT UNIQUE\n);\n\nCREATE TABLE tblGrandPrix(\n    id INT PRIMARY KEY,\n    country VARCHAR(100),\n    circuit VARCHAR(150),\n    length FLOAT,\n    laps INT\n);\n\nCREATE TABLE tblSchedule(\n    id INT PRIMARY KEY,\n    date DATE,\n    purpose ENUM('Practice','Qualify','Race'),\n    startTime TIME\n);\n\nCREATE TABLE tblContract(\n    id INT PRIMARY KEY,\n    driverId INT,\n    teamId INT,\n    FOREIGN KEY(driverId) REFERENCES tblDriver(id),\n    FOREIGN KEY(teamId) REFERENCES tblTeam(id)\n);\n\nCREATE TABLE tblGPinSeason(\n    id INT PRIMARY KEY,\n    seasonId INT,\n    grandPrixId INT,\n    scheduleId INT,\n    FOREIGN KEY(seasonId) REFERENCES tblSeason(id),\n    FOREIGN KEY(grandPrixId) REFERENCES tblGrandPrix(id),\n    FOREIGN KEY(scheduleId) REFERENCES tblSchedule(id)\n);\n\nCREATE TABLE tblResult(\n    id INT PRIMARY KEY,\n    time VARCHAR(20),\n    lapFinished INT,\n    position INT,\n    point INT,\n    contractId INT,\n    memberId INT,\n    gpinSeasonId INT,\n    FOREIGN KEY(contractId) REFERENCES tblContract(id),\n    FOREIGN KEY(memberId) REFERENCES tblMember(id),\n    FOREIGN KEY(gpinSeasonId) REFERENCES tblGPinSeason(id)\n);\n\n-- =======================\n-- INSERT DATA\n-- =======================\n\nINSERT INTO tblTeam VALUES\n(1,'Red Bull Racing','Mateschitz'),\n(2,'Ferrari','Elkann'),\n(3,'Mercedes','Wolff'),\n(4,'McLaren','Brown'),\n(5,'Aston Martin','Stroll'),\n(6,'RB Honda','Honda'),\n(7,'Haas','Gene Haas'),\n(8,'Williams','Dorilton Capital'),\n(9,'Alpine','Renault Group'),\n(10,'Kick Sauber','Audi F1 2026');\n\nINSERT INTO tblDriver VALUES\n(1,'Max Verstappen','1997-09-30','Netherlands'),\n(2,'Sergio Perez','1990-01-26','Mexico'),\n(3,'Charles Leclerc','1997-10-16','Monaco'),\n(4,'Carlos Sainz','1994-09-01','Spain'),\n(5,'Lewis Hamilton','1985-01-07','UK'),\n(6,'George Russell','1998-02-15','UK'),\n(7,'Lando Norris','1999-11-13','UK'),\n(8,'Oscar Piastri','2001-04-06','Australia'),\n(9,'Fernando Alonso','1981-07-29','Spain'),\n(10,'Lance Stroll','1998-10-29','Canada'),\n(11,'Tsunoda Yuki','2000-05-11','Japan'),\n(12,'Daniel Ricciardo','1989-07-01','Australia'),\n(13,'Nico Hulkenberg','1987-08-19','Germany'),\n(14,'Kevin Magnussen','1992-10-05','Denmark'),\n(15,'Alex Albon','1996-03-23','Thailand'),\n(16,'Logan Sargeant','2000-12-31','USA'),\n(17,'Esteban Ocon','1996-09-17','France'),\n(18,'Pierre Gasly','1996-02-07','France'),\n(19,'Valtteri Bottas','1989-08-28','Finland'),\n(20,'Guanyu Zhou','1999-05-30','China');\n\nINSERT INTO tblMember VALUES\n(1,'admin','123','Race Control'),\n(2,'official','123','Track Official'),\n(3,'editor','123','Time Keeper');\n\nINSERT INTO tblSeason VALUES (1,2025);\n\nINSERT INTO tblGrandPrix VALUES\n(1,'Bahrain','Sakhir',5.412,57),\n(2,'Saudi Arabia','Jeddah',6.174,50),\n(3,'Australia','Albert Park',5.278,58),\n(4,'Baku','Baku Street',6.003,51),\n(5,'Monaco','Monte Carlo',3.337,78);\n\nINSERT INTO tblSchedule VALUES\n(1,'2025-03-01','Race','18:00'),\n(2,'2025-03-08','Race','18:00'),\n(3,'2025-03-15','Race','14:00'),\n(4,'2025-03-25','Race','20:00'),\n(5,'2025-04-05','Race','21:00');\n\n-- ==========================\n-- 20 DRIVERS = 10 CONTRACTS\n-- ==========================\nINSERT INTO tblContract VALUES\n(1,1,1),(2,2,1),\n(3,3,2),(4,4,2),\n(5,5,3),(6,6,3),\n(7,7,4),(8,8,4),\n(9,9,5),(10,10,5),\n(11,11,6),(12,12,6),\n(13,13,7),(14,14,7),\n(15,15,8),(16,16,8),\n(17,17,9),(18,18,9),\n(19,19,10),(20,20,10);\n\nINSERT INTO tblGPinSeason VALUES\n(1,1,1,1),\n(2,1,2,2),\n(3,1,3,3),\n(4,1,4,4),\n(5,1,5,5);\n\n-- ==========================\n-- RESULT FOR 5 RACES × 20 DRIVERS\n-- FIA POINTS TOP 10: 25 18 15 12 10 8 6 4 2 1\n-- Others = 0\n-- ==========================\n\n-- ==========================\n-- RESULT FOR 5 RACES × 20 DRIVERS\n-- gpinSeasonId: 1..5\n-- FIA POINTS: 25 18 15 12 10 8 6 4 2 1, còn lại 0\n-- ==========================\n\nINSERT INTO tblResult (id, time, lapFinished, position, point, contractId, memberId, gpinSeasonId) VALUES\n-- Bahrain (GP 1, gpinSeasonId = 1, 57 laps)\n(1, '1:32:15', 57, 1, 25, 1, 1, 1),\n(2, '1:32:25', 57, 2, 18, 2, 1, 1),\n(3, '1:32:35', 57, 3, 15, 3, 1, 1),\n(4, '1:32:45', 57, 4, 12, 4, 1, 1),\n(5, '1:32:55', 57, 5, 10, 5, 1, 1),\n(6, '1:33:05', 57, 6,  8, 6, 1, 1),\n(7, '1:33:15', 57, 7,  6, 7, 1, 1),\n(8, '1:33:25', 57, 8,  4, 8, 1, 1),\n(9, '1:33:35', 57, 9,  2, 9, 1, 1),\n(10,'1:33:45', 57,10,  1,10, 1, 1),\n(11,'1:33:55', 57,11,  0,11, 1, 1),\n(12,'1:34:05', 57,12,  0,12, 1, 1),\n(13,'1:34:15', 57,13,  0,13, 1, 1),\n(14,'1:34:25', 57,14,  0,14, 1, 1),\n(15,'1:34:35', 57,15,  0,15, 1, 1),\n(16,'1:34:45', 57,16,  0,16, 1, 1),\n(17,'1:34:55', 57,17,  0,17, 1, 1),\n(18,'1:35:05', 57,18,  0,18, 1, 1),\n(19,'1:35:15', 57,19,  0,19, 1, 1),\n(20,'1:35:25', 57,20,  0,20, 1, 1),\n\n-- Saudi Arabia (GP 2, gpinSeasonId = 2, 50 laps)\n(21, '1:28:10', 50, 1, 25, 1, 1, 2),\n(22, '1:28:20', 50, 2, 18, 2, 1, 2),\n(23, '1:28:30', 50, 3, 15, 3, 1, 2),\n(24, '1:28:40', 50, 4, 12, 4, 1, 2),\n(25, '1:28:50', 50, 5, 10, 5, 1, 2),\n(26, '1:29:00', 50, 6,  8, 6, 1, 2),\n(27, '1:29:10', 50, 7,  6, 7, 1, 2),\n(28, '1:29:20', 50, 8,  4, 8, 1, 2),\n(29, '1:29:30', 50, 9,  2, 9, 1, 2),\n(30, '1:29:40', 50,10,  1,10, 1, 2),\n(31, '1:29:50', 50,11,  0,11, 1, 2),\n(32, '1:30:00', 50,12,  0,12, 1, 2),\n(33, '1:30:10', 50,13,  0,13, 1, 2),\n(34, '1:30:20', 50,14,  0,14, 1, 2),\n(35, '1:30:30', 50,15,  0,15, 1, 2),\n(36, '1:30:40', 50,16,  0,16, 1, 2),\n(37, '1:30:50', 50,17,  0,17, 1, 2),\n(38, '1:31:00', 50,18,  0,18, 1, 2),\n(39, '1:31:10', 50,19,  0,19, 1, 2),\n(40, '1:31:20', 50,20,  0,20, 1, 2),\n\n-- Australia (GP 3, gpinSeasonId = 3, 58 laps)\n(41, '1:38:00', 58, 1, 25, 1, 1, 3),\n(42, '1:38:10', 58, 2, 18, 2, 1, 3),\n(43, '1:38:20', 58, 3, 15, 3, 1, 3),\n(44, '1:38:30', 58, 4, 12, 4, 1, 3),\n(45, '1:38:40', 58, 5, 10, 5, 1, 3),\n(46, '1:38:50', 58, 6,  8, 6, 1, 3),\n(47, '1:39:00', 58, 7,  6, 7, 1, 3),\n(48, '1:39:10', 58, 8,  4, 8, 1, 3),\n(49, '1:39:20', 58, 9,  2, 9, 1, 3),\n(50, '1:39:30', 58,10,  1,10, 1, 3),\n(51, '1:39:40', 58,11,  0,11, 1, 3),\n(52, '1:39:50', 58,12,  0,12, 1, 3),\n(53, '1:40:00', 58,13,  0,13, 1, 3),\n(54, '1:40:10', 58,14,  0,14, 1, 3),\n(55, '1:40:20', 58,15,  0,15, 1, 3),\n(56, '1:40:30', 58,16,  0,16, 1, 3),\n(57, '1:40:40', 58,17,  0,17, 1, 3),\n(58, '1:40:50', 58,18,  0,18, 1, 3),\n(59, '1:41:00', 58,19,  0,19, 1, 3),\n(60, '1:41:10', 58,20,  0,20, 1, 3),\n\n-- Baku (GP 4, gpinSeasonId = 4, 51 laps)\n(61, '1:42:00', 51, 1, 25, 1, 1, 4),\n(62, '1:42:10', 51, 2, 18, 2, 1, 4),\n(63, '1:42:20', 51, 3, 15, 3, 1, 4),\n(64, '1:42:30', 51, 4, 12, 4, 1, 4),\n(65, '1:42:40', 51, 5, 10, 5, 1, 4),\n(66, '1:42:50', 51, 6,  8, 6, 1, 4),\n(67, '1:43:00', 51, 7,  6, 7, 1, 4),\n(68, '1:43:10', 51, 8,  4, 8, 1, 4),\n(69, '1:43:20', 51, 9,  2, 9, 1, 4),\n(70, '1:43:30', 51,10,  1,10, 1, 4),\n(71, '1:43:40', 51,11,  0,11, 1, 4),\n(72, '1:43:50', 51,12,  0,12, 1, 4),\n(73, '1:44:00', 51,13,  0,13, 1, 4),\n(74, '1:44:10', 51,14,  0,14, 1, 4),\n(75, '1:44:20', 51,15,  0,15, 1, 4),\n(76, '1:44:30', 51,16,  0,16, 1, 4),\n(77, '1:44:40', 51,17,  0,17, 1, 4),\n(78, '1:44:50', 51,18,  0,18, 1, 4),\n(79, '1:45:00', 51,19,  0,19, 1, 4),\n(80, '1:45:10', 51,20,  0,20, 1, 4),\n\n-- Monaco (GP 5, gpinSeasonId = 5, 78 laps)\n(81, '1:46:00', 78, 1, 25, 1, 1, 5),\n(82, '1:46:10', 78, 2, 18, 2, 1, 5),\n(83, '1:46:20', 78, 3, 15, 3, 1, 5),\n(84, '1:46:30', 78, 4, 12, 4, 1, 5),\n(85, '1:46:40', 78, 5, 10, 5, 1, 5),\n(86, '1:46:50', 78, 6,  8, 6, 1, 5),\n(87, '1:47:00', 78, 7,  6, 7, 1, 5),\n(88, '1:47:10', 78, 8,  4, 8, 1, 5),\n(89, '1:47:20', 78, 9,  2, 9, 1, 5),\n(90, '1:47:30', 78,10,  1,10, 1, 5),\n(91, '1:47:40', 78,11,  0,11, 1, 5),\n(92, '1:47:50', 78,12,  0,12, 1, 5),\n(93, '1:48:00', 78,13,  0,13, 1, 5),\n(94, '1:48:10', 78,14,  0,14, 1, 5),\n(95, '1:48:20', 78,15,  0,15, 1, 5),\n(96, '1:48:30', 78,16,  0,16, 1, 5),\n(97, '1:48:40', 78,17,  0,17, 1, 5),\n(98, '1:48:50', 78,18,  0,18, 1, 5),\n(99, '1:49:00', 78,19,  0,19, 1, 5),\n(100,'1:49:10', 78,20,  0,20, 1, 5);\n\n\n",
+    "content": "CREATE DATABASE f1_management;\nUSE f1_management;\n\nDROP TABLE IF EXISTS tblResult;\nDROP TABLE IF EXISTS tblContract;\nDROP TABLE IF EXISTS tblGPinSeason;\nDROP TABLE IF EXISTS tblSchedule;\nDROP TABLE IF EXISTS tblGrandPrix;\nDROP TABLE IF EXISTS tblSeason;\nDROP TABLE IF EXISTS tblMember;\nDROP TABLE IF EXISTS tblDriver;\nDROP TABLE IF EXISTS tblTeam;\n\nCREATE TABLE tblTeam(\n    id INT PRIMARY KEY,\n    name VARCHAR(255),\n    owner VARCHAR(100)\n);\n\nCREATE TABLE tblDriver(\n    id INT PRIMARY KEY,\n    fullname VARCHAR(255),\n    dob DATE,\n    nationality VARCHAR(100)\n);\n\nCREATE TABLE tblMember(\n    id INT PRIMARY KEY,\n    username VARCHAR(50) UNIQUE,\n    password VARCHAR(50),\n    fullname VARCHAR(255)\n);\n\nCREATE TABLE tblSeason(\n    id INT PRIMARY KEY,\n    year INT UNIQUE\n);\n\nCREATE TABLE tblGrandPrix(\n    id INT PRIMARY KEY,\n    country VARCHAR(100),\n    circuit VARCHAR(150),\n    length FLOAT,\n    laps INT\n);\n\nCREATE TABLE tblSchedule(\n    id INT PRIMARY KEY,\n    date DATE,\n    purpose ENUM('Practice','Qualify','Race'),\n    startTime TIME\n);\n\nCREATE TABLE tblContract(\n    id INT PRIMARY KEY,\n    driverId INT,\n    teamId INT,\n    FOREIGN KEY(driverId) REFERENCES tblDriver(id),\n    FOREIGN KEY(teamId) REFERENCES tblTeam(id)\n);\n\nCREATE TABLE tblGPinSeason(\n    id INT PRIMARY KEY,\n    seasonId INT,\n    grandPrixId INT,\n    scheduleId INT,\n    FOREIGN KEY(seasonId) REFERENCES tblSeason(id),\n    FOREIGN KEY(grandPrixId) REFERENCES tblGrandPrix(id),\n    FOREIGN KEY(scheduleId) REFERENCES tblSchedule(id)\n);\n\nCREATE TABLE tblResult(\n    id INT PRIMARY KEY,\n    time VARCHAR(20),\n    lapFinished INT,\n    position INT,\n    point INT,\n    contractId INT,\n    memberId INT,\n    gpinSeasonId INT,\n    FOREIGN KEY(contractId) REFERENCES tblContract(id),\n    FOREIGN KEY(memberId) REFERENCES tblMember(id),\n    FOREIGN KEY(gpinSeasonId) REFERENCES tblGPinSeason(id)\n);\n\nINSERT INTO tblTeam VALUES\n(1,'Red Bull Racing','Mateschitz'),\n(2,'Ferrari','Elkann'),\n(3,'Mercedes','Wolff'),\n(4,'McLaren','Brown'),\n(5,'Aston Martin','Stroll'),\n(6,'RB Honda','Honda'),\n(7,'Haas','Gene Haas'),\n(8,'Williams','Dorilton Capital'),\n(9,'Alpine','Renault Group'),\n(10,'Kick Sauber','Audi F1 2026');\n\nINSERT INTO tblDriver VALUES\n(1,'Max Verstappen','1997-09-30','Netherlands'),\n(2,'Sergio Perez','1990-01-26','Mexico'),\n(3,'Charles Leclerc','1997-10-16','Monaco'),\n(4,'Carlos Sainz','1994-09-01','Spain'),\n(5,'Lewis Hamilton','1985-01-07','UK'),\n(6,'George Russell','1998-02-15','UK'),\n(7,'Lando Norris','1999-11-13','UK'),\n(8,'Oscar Piastri','2001-04-06','Australia'),\n(9,'Fernando Alonso','1981-07-29','Spain'),\n(10,'Lance Stroll','1998-10-29','Canada'),\n(11,'Tsunoda Yuki','2000-05-11','Japan'),\n(12,'Daniel Ricciardo','1989-07-01','Australia'),\n(13,'Nico Hulkenberg','1987-08-19','Germany'),\n(14,'Kevin Magnussen','1992-10-05','Denmark'),\n(15,'Alex Albon','1996-03-23','Thailand'),\n(16,'Logan Sargeant','2000-12-31','USA'),\n(17,'Esteban Ocon','1996-09-17','France'),\n(18,'Pierre Gasly','1996-02-07','France'),\n(19,'Valtteri Bottas','1989-08-28','Finland'),\n(20,'Guanyu Zhou','1999-05-30','China');\n\nINSERT INTO tblMember VALUES\n(1,'admin','123','Race Control'),\n(2,'staff1','123','Track Official'),\n(3,'staff2','123','Time Keeper');\n\nINSERT INTO tblSeason VALUES (1,2025);\n\nINSERT INTO tblGrandPrix VALUES\n(1,'Bahrain','Sakhir',5.412,57),\n(2,'Saudi Arabia','Jeddah',6.174,50),\n(3,'Australia','Albert Park',5.278,58),\n(4,'Baku','Baku Street',6.003,51),\n(5,'Monaco','Monte Carlo',3.337,78);\n\nINSERT INTO tblSchedule VALUES\n(1,'2025-03-01','Race','18:00'),\n(2,'2025-03-08','Race','18:00'),\n(3,'2025-03-15','Race','14:00'),\n(4,'2025-03-25','Race','20:00'),\n(5,'2025-04-05','Race','21:00');\n\nINSERT INTO tblContract VALUES\n(1,1,1),(2,2,1),\n(3,3,2),(4,4,2),\n(5,5,3),(6,6,3),\n(7,7,4),(8,8,4),\n(9,9,5),(10,10,5),\n(11,11,6),(12,12,6),\n(13,13,7),(14,14,7),\n(15,15,8),(16,16,8),\n(17,17,9),(18,18,9),\n(19,19,10),(20,20,10);\n\nINSERT INTO tblGPinSeason VALUES\n(1,1,1,1),\n(2,1,2,2),\n(3,1,3,3),\n(4,1,4,4),\n(5,1,5,5);\n\nINSERT INTO tblResult (id, time, lapFinished, position, point, contractId, memberId, gpinSeasonId) VALUES\n(1, '1:32:15', 57, 1, 25, 1, 1, 1),\n(2, '1:32:25', 57, 2, 18, 2, 1, 1),\n(3, '1:32:35', 57, 3, 15, 3, 1, 1),\n(4, '1:32:45', 57, 4, 12, 4, 1, 1),\n(5, '1:32:55', 57, 5, 10, 5, 1, 1),\n(6, '1:33:05', 57, 6,  8, 6, 1, 1),\n(7, '1:33:15', 57, 7,  6, 7, 1, 1),\n(8, '1:33:25', 57, 8,  4, 8, 1, 1),\n(9, '1:33:35', 57, 9,  2, 9, 1, 1),\n(10,'1:33:45', 57,10,  1,10, 1, 1),\n(11,'1:33:55', 57,11,  0,11, 1, 1),\n(12,'1:34:05', 57,12,  0,12, 1, 1),\n(13,'1:34:15', 57,13,  0,13, 1, 1),\n(14,'1:34:25', 57,14,  0,14, 1, 1),\n(15,'1:34:35', 57,15,  0,15, 1, 1),\n(16,'1:34:45', 57,16,  0,16, 1, 1),\n(17,'1:34:55', 57,17,  0,17, 1, 1),\n(18,'1:35:05', 57,18,  0,18, 1, 1),\n(19,'1:35:15', 57,19,  0,19, 1, 1),\n(20,'1:35:25', 57,20,  0,20, 1, 1),\n\n(21, '1:28:10', 50, 1, 25, 1, 1, 2),\n(22, '1:28:20', 50, 2, 18, 2, 1, 2),\n(23, '1:28:30', 50, 3, 15, 3, 1, 2),\n(24, '1:28:40', 50, 4, 12, 4, 1, 2),\n(25, '1:28:50', 50, 5, 10, 5, 1, 2),\n(26, '1:29:00', 50, 6,  8, 6, 1, 2),\n(27, '1:29:10', 50, 7,  6, 7, 1, 2),\n(28, '1:29:20', 50, 8,  4, 8, 1, 2),\n(29, '1:29:30', 50, 9,  2, 9, 1, 2),\n(30, '1:29:40', 50,10,  1,10, 1, 2),\n(31, '1:29:50', 50,11,  0,11, 1, 2),\n(32, '1:30:00', 50,12,  0,12, 1, 2),\n(33, '1:30:10', 50,13,  0,13, 1, 2),\n(34, '1:30:20', 50,14,  0,14, 1, 2),\n(35, '1:30:30', 50,15,  0,15, 1, 2),\n(36, '1:30:40', 50,16,  0,16, 1, 2),\n(37, '1:30:50', 50,17,  0,17, 1, 2),\n(38, '1:31:00', 50,18,  0,18, 1, 2),\n(39, '1:31:10', 50,19,  0,19, 1, 2),\n(40, '1:31:20', 50,20,  0,20, 1, 2),\n\n(41, '1:38:00', 58, 1, 25, 1, 1, 3),\n(42, '1:38:10', 58, 2, 18, 2, 1, 3),\n(43, '1:38:20', 58, 3, 15, 3, 1, 3),\n(44, '1:38:30', 58, 4, 12, 4, 1, 3),\n(45, '1:38:40', 58, 5, 10, 5, 1, 3),\n(46, '1:38:50', 58, 6,  8, 6, 1, 3),\n(47, '1:39:00', 58, 7,  6, 7, 1, 3),\n(48, '1:39:10', 58, 8,  4, 8, 1, 3),\n(49, '1:39:20', 58, 9,  2, 9, 1, 3),\n(50, '1:39:30', 58,10,  1,10, 1, 3),\n(51, '1:39:40', 58,11,  0,11, 1, 3),\n(52, '1:39:50', 58,12,  0,12, 1, 3),\n(53, '1:40:00', 58,13,  0,13, 1, 3),\n(54, '1:40:10', 58,14,  0,14, 1, 3),\n(55, '1:40:20', 58,15,  0,15, 1, 3),\n(56, '1:40:30', 58,16,  0,16, 1, 3),\n(57, '1:40:40', 58,17,  0,17, 1, 3),\n(58, '1:40:50', 58,18,  0,18, 1, 3),\n(59, '1:41:00', 58,19,  0,19, 1, 3),\n(60, '1:41:10', 58,20,  0,20, 1, 3),\n\n(61, '1:42:00', 51, 1, 25, 1, 1, 4),\n(62, '1:42:10', 51, 2, 18, 2, 1, 4),\n(63, '1:42:20', 51, 3, 15, 3, 1, 4),\n(64, '1:42:30', 51, 4, 12, 4, 1, 4),\n(65, '1:42:40', 51, 5, 10, 5, 1, 4),\n(66, '1:42:50', 51, 6,  8, 6, 1, 4),\n(67, '1:43:00', 51, 7,  6, 7, 1, 4),\n(68, '1:43:10', 51, 8,  4, 8, 1, 4),\n(69, '1:43:20', 51, 9,  2, 9, 1, 4),\n(70, '1:43:30', 51,10,  1,10, 1, 4),\n(71, '1:43:40', 51,11,  0,11, 1, 4),\n(72, '1:43:50', 51,12,  0,12, 1, 4),\n(73, '1:44:00', 51,13,  0,13, 1, 4),\n(74, '1:44:10', 51,14,  0,14, 1, 4),\n(75, '1:44:20', 51,15,  0,15, 1, 4),\n(76, '1:44:30', 51,16,  0,16, 1, 4),\n(77, '1:44:40', 51,17,  0,17, 1, 4),\n(78, '1:44:50', 51,18,  0,18, 1, 4),\n(79, '1:45:00', 51,19,  0,19, 1, 4),\n(80, '1:45:10', 51,20,  0,20, 1, 4),\n\n(81, '1:46:00', 78, 1, 25, 1, 1, 5),\n(82, '1:46:10', 78, 2, 18, 2, 1, 5),\n(83, '1:46:20', 78, 3, 15, 3, 1, 5),\n(84, '1:46:30', 78, 4, 12, 4, 1, 5),\n(85, '1:46:40', 78, 5, 10, 5, 1, 5),\n(86, '1:46:50', 78, 6,  8, 6, 1, 5),\n(87, '1:47:00', 78, 7,  6, 7, 1, 5),\n(88, '1:47:10', 78, 8,  4, 8, 1, 5),\n(89, '1:47:20', 78, 9,  2, 9, 1, 5),\n(90, '1:47:30', 78,10,  1,10, 1, 5),\n(91, '1:47:40', 78,11,  0,11, 1, 5),\n(92, '1:47:50', 78,12,  0,12, 1, 5),\n(93, '1:48:00', 78,13,  0,13, 1, 5),\n(94, '1:48:10', 78,14,  0,14, 1, 5),\n(95, '1:48:20', 78,15,  0,15, 1, 5),\n(96, '1:48:30', 78,16,  0,16, 1, 5),\n(97, '1:48:40', 78,17,  0,17, 1, 5),\n(98, '1:48:50', 78,18,  0,18, 1, 5),\n(99, '1:49:00', 78,19,  0,19, 1, 5),\n(100,'1:49:10', 78,20,  0,20, 1, 5);\n\n\n",
     "options": {
         "tabSize": 4,
         "indentSize": 4,
@@ -13,24 +13,24 @@
     "viewState": {
         "cursorState": [
             {
-                "inSelectionMode": true,
+                "inSelectionMode": false,
                 "selectionStart": {
-                    "lineNumber": 295,
-                    "column": 37
+                    "lineNumber": 123,
+                    "column": 11
                 },
                 "position": {
-                    "lineNumber": 185,
-                    "column": 1
+                    "lineNumber": 123,
+                    "column": 11
                 }
             }
         ],
         "viewState": {
             "scrollLeft": 0,
             "firstPosition": {
-                "lineNumber": 164,
+                "lineNumber": 105,
                 "column": 1
             },
-            "firstPositionDeltaTop": 0
+            "firstPositionDeltaTop": -4
         },
         "contributionsState": {
             "editor.contrib.folding": {},
@@ -41,7 +41,7 @@
         {
             "state": {
                 "start": 1,
-                "end": 296,
+                "end": 265,
                 "language": "mysql",
                 "result": {
                     "type": "text",
@@ -79,252 +79,252 @@
                         "delimiter": ";",
                         "span": {
                             "start": 49,
-                            "length": 112
+                            "length": 33
                         },
-                        "contentStart": 131,
+                        "contentStart": 52,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 161,
+                            "start": 82,
                             "length": 34
                         },
-                        "contentStart": 163,
+                        "contentStart": 84,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 195,
+                            "start": 116,
                             "length": 36
                         },
-                        "contentStart": 197,
+                        "contentStart": 118,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 231,
+                            "start": 152,
                             "length": 34
                         },
-                        "contentStart": 233,
+                        "contentStart": 154,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 265,
+                            "start": 186,
                             "length": 35
                         },
-                        "contentStart": 267,
+                        "contentStart": 188,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 300,
+                            "start": 221,
                             "length": 32
                         },
-                        "contentStart": 302,
+                        "contentStart": 223,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 332,
+                            "start": 253,
                             "length": 32
                         },
-                        "contentStart": 334,
+                        "contentStart": 255,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 364,
+                            "start": 285,
                             "length": 32
                         },
-                        "contentStart": 366,
+                        "contentStart": 287,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 396,
+                            "start": 317,
                             "length": 30
                         },
-                        "contentStart": 398,
+                        "contentStart": 319,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 426,
-                            "length": 175
+                            "start": 347,
+                            "length": 96
                         },
-                        "contentStart": 507,
+                        "contentStart": 349,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 601,
+                            "start": 443,
                             "length": 122
                         },
-                        "contentStart": 603,
+                        "contentStart": 445,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 723,
+                            "start": 565,
                             "length": 137
                         },
-                        "contentStart": 725,
+                        "contentStart": 567,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 860,
+                            "start": 702,
                             "length": 72
                         },
-                        "contentStart": 862,
+                        "contentStart": 704,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 932,
+                            "start": 774,
                             "length": 138
                         },
-                        "contentStart": 934,
+                        "contentStart": 776,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 1070,
+                            "start": 912,
                             "length": 135
                         },
-                        "contentStart": 1072,
+                        "contentStart": 914,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 1205,
+                            "start": 1047,
                             "length": 187
                         },
-                        "contentStart": 1207,
+                        "contentStart": 1049,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 1392,
+                            "start": 1234,
                             "length": 280
                         },
-                        "contentStart": 1394,
+                        "contentStart": 1236,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 1672,
+                            "start": 1514,
                             "length": 355
                         },
-                        "contentStart": 1674,
+                        "contentStart": 1516,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2027,
-                            "length": 382
+                            "start": 1869,
+                            "length": 312
                         },
-                        "contentStart": 2099,
+                        "contentStart": 1871,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2409,
+                            "start": 2181,
                             "length": 903
                         },
-                        "contentStart": 2411,
+                        "contentStart": 2183,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3312,
-                            "length": 137
+                            "start": 3084,
+                            "length": 135
                         },
-                        "contentStart": 3314,
+                        "contentStart": 3086,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3449,
+                            "start": 3219,
                             "length": 40
                         },
-                        "contentStart": 3451,
+                        "contentStart": 3221,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3489,
+                            "start": 3259,
                             "length": 216
                         },
-                        "contentStart": 3491,
+                        "contentStart": 3261,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3705,
+                            "start": 3475,
                             "length": 197
                         },
-                        "contentStart": 3707,
+                        "contentStart": 3477,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3902,
-                            "length": 315
+                            "start": 3672,
+                            "length": 226
                         },
-                        "contentStart": 3993,
+                        "contentStart": 3674,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 4217,
+                            "start": 3898,
                             "length": 89
                         },
-                        "contentStart": 4219,
+                        "contentStart": 3900,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 4306,
-                            "length": 4345
+                            "start": 3987,
+                            "length": 3791
                         },
-                        "contentStart": 4634,
+                        "contentStart": 3989,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 8651,
+                            "start": 7778,
                             "length": 1
                         },
-                        "contentStart": 8650,
+                        "contentStart": 7777,
                         "state": 3
                     }
                 ]
@@ -333,8 +333,8 @@
         },
         {
             "state": {
-                "start": 297,
-                "end": 297,
+                "start": 266,
+                "end": 266,
                 "language": "mysql",
                 "currentSet": 1,
                 "statements": [
@@ -353,8 +353,8 @@
         },
         {
             "state": {
-                "start": 298,
-                "end": 298,
+                "start": 267,
+                "end": 267,
                 "language": "mysql",
                 "currentSet": 1,
                 "statements": [
