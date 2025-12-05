@@ -1,63 +1,83 @@
 package com.f1management.servlet;
 
 import com.f1management.dao.*;
-import com.f1management.model.Result;
+import com.f1management.model.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
-@WebServlet("/doupdate") 
+@WebServlet("/doupdate")
 public class DoUpdateServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+
+        GPinSeasonDAO gpdao = new GPinSeasonDAO();
+        session.setAttribute("currentGP", gpdao.getCurrentGP());
+
+
+        session.removeAttribute("ResultList");
+        session.removeAttribute("selectedGP");
+
+        System.out.println("Loaded GP List Successfully");
+
+        response.sendRedirect("views/UpdateResult.jsp");
+    }
+
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
 
         String action = request.getParameter("action");
-        if (action == null) action = "load";
+        String gpId = request.getParameter("selectedGP");
 
-        GPinSeasonDAO gpDAO   = new GPinSeasonDAO();
-        ResultDAO resultDAO   = new ResultDAO();
-        ContractDAO contractDAO = new ContractDAO();
+        ResultDAO rdao = new ResultDAO();
 
-        if (action.equals("load")) {
+        if (gpId != null && !"save".equals(action)) {
 
-            String selectedGP = request.getParameter("selectedGP");
+            Result[] results = rdao.getGPResult(gpId);
 
-            session.setAttribute("currentGP", gpDAO.getCurrentGP());  
-            session.setAttribute("ResultList", resultDAO.getGPResult(selectedGP));  
+            session.setAttribute("currentResult", results);
+            session.setAttribute("selectedGP", gpId);
 
+            System.out.println("Loaded Result for GP = " + gpId);
             response.sendRedirect("views/UpdateResult.jsp");
             return;
         }
 
-        if (action.equals("save")) {
+        if ("save".equals(action)) {
 
-            List<Result> results = (List<Result>) session.getAttribute("ResultList");
-
-            for (int i = 0; i < results.size(); i++) {
-                Result r = results.get(i);
-
-                r.setPoint(Integer.parseInt(request.getParameter("point_" + i)));
-                r.setTime(request.getParameter("time_" + i));
-                r.setLapFinished(Integer.parseInt(request.getParameter("laps_" + i)));
+            Result[] rs = (Result[]) session.getAttribute("currentResult");
+            if (rs == null) {
+                response.sendRedirect("views/UpdateResult.jsp");
+                return;
             }
 
-            boolean success = resultDAO.updateResult(results);
-
-            if (success) {
-                session.setAttribute("ResultSaved", "Update successful!");
-            } else {
-                session.setAttribute("ResultSaved", "Update FAILED!");
+            for (int i = 0; i < rs.length; i++) {
+                rs[i].setPoint(Integer.parseInt(request.getParameter("point_" + i)));
+                rs[i].setTime(request.getParameter("time_" + i));
+                rs[i].setLapFinished(Integer.parseInt(request.getParameter("laps_" + i)));
+                rs[i].setPosition(Integer.parseInt(request.getParameter("pos_" + i)));
             }
 
-            response.sendRedirect("views/UpdateResult.jsp");
+            boolean ok = rdao.updateResult(rs);
+
+            request.setAttribute("msg", ok ? "Updated Successfully" : "Update Failed");
+
+            System.out.println(ok ? "RESULT UPDATE SUCCESS" : "RESULT UPDATE FAILED");
+
+            request.getRequestDispatcher("views/UpdateResult.jsp").forward(request, response);
         }
     }
 }

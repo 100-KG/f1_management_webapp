@@ -1,64 +1,98 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.f1management.model.GPinSeason" %>
+<%@ page import="com.f1management.model.Result" %>
 
 <%
-    List<GPinSeason> gpList = (List<GPinSeason>) session.getAttribute("currentGP");
-    List<Result> results = (List<Result>) session.getAttribute("ResultList");
+    GPinSeason[] gpList = (GPinSeason[]) session.getAttribute("currentGP");
+    Result[] results = (Result[]) session.getAttribute("currentResult");
+    String message = (String) request.getAttribute("msg");
 %>
+
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset = "UTF-8">
-        <title>Update Result</title>
-        <base href="${pageContext.request.contextPath}/">
-        <link rel="stylesheet" href="css/UpdateResult.css">
-    </head>
-    <body>
-        <div class="container">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Result</title>
+    <base href="${pageContext.request.contextPath}/">
+    <link rel="stylesheet" href="css/styleUpdateResult.css">
+</head>
 
-        <h2>Update Result</h2>
+<body>
+<div class="container">
 
-        <form method="post" action="../doupdate">
-            <select name="selectedGP" class="gp-dropdown">
-                <option disabled selected>Select Grand Prix</option>
-                <% if(gpList != null) {
-                    for(GPinSeason g : gpList) { %>
-                        <option value="<%=g.getId()%>">GP <%=g.getGrandPrixId()%></option>
-                <% }} %>
-            </select>
+    <h2>Update Result</h2>
 
-            <!-- RESULT TABLE -->
-            <table class="result-table">
-                <tr>
-                    <th>Driver</th>
-                    <th>Team</th>
-                    <th>Point</th>
-                    <th>Time</th>
-                    <th>Laps</th>
-                </tr>
+    <% System.out.println("UpdateResult.jsp loaded"); %>
 
-                <% if(results != null){
-                    for(int i=0; i<results.size(); i++){ Result r = results.get(i); %>
-                        <tr>
-                            <td><%= r.getDriverName() %></td>
-                            <td><%= r.getTeamName() %></td>
+    <% if(message != null) { %>
+        <p class="alert"><%= message %></p>
+    <% } %>
 
-                            <!-- Editable -->
-                            <td><input type="number" name="point_<%=i%>" value="<%=r.getPoint()%>"></td>
-                            <td><input type="text" name="time_<%=i%>" value="<%=r.getTime()%>"></td>
-                            <td><input type="number" name="laps_<%=i%>" value="<%=r.getLapfinished()%>"></td>
+    <form method="post" action="doupdate">
+        <label>Select a Grand Prix</label>
+        <select name="selectedGP" class="gp-dropdown" onchange="this.form.submit()">
+            <option disabled selected>-- Select Grand Prix --</option>
+            <% if(gpList != null){
+                for(GPinSeason gp : gpList){
+            %>
+                <option value="<%= gp.getId() %>"
+                <%= (session.getAttribute("selectedGP")!=null && session.getAttribute("selectedGP").toString().equals(gp.getId()+"")) ? "selected" : "" %> >
+                <%= gp.getCountry() %> GP
+                </option>
+            <% }} %>
+        </select>
+    </form>
 
-                            <input type="hidden" name="rid_<%=i%>" value="<%=r.getId()%>">  
-                        </tr>
-                <% }} %>
-            </table>
+    <form method="post" action="doupdate">
+    <table class="result-table">
+        <tr>
+            <th>Driver</th>
+            <th>Team</th>
+            <th>Point</th>
+            <th>Time</th>
+            <th>Laps</th>
+            <th>Position</th>
+        </tr>
 
-            <div class="actions">
-                <button type="submit" name="action" value="save" class="btn-save">Save</button>
-                <a href="StaffHome.jsp" class="btn-back">Back</a>
-            </div>
+        <% if(results == null) { %>
+    <% for(int i=0;i<20;i++){ %>
+        <tr>
+            <td>—</td>
+            <td>—</td>
+            <td><input type="number" name="point_<%=i%>" value=""></td>
+            <td><input type="text"   name="time_<%=i%>" value=""></td>
+            <td><input type="number" name="laps_<%=i%>" value=""></td>
+            <td><input type="number" name="pos_<%=i%>" value=""></td>
+        </tr>
+    <% } %>
 
-        </form>
+<% } else { %>
 
+    <% for(int i=0;i<results.length;i++){ Result r = results[i]; %>
+        <tr>
+            <td><%= r.getDriver() %></td>
+            <td><%= r.getTeam() %></td>
+
+            <td><input type="number" name="point_<%=i%>" value="<%=r.getPoint()%>"></td>
+            <td><input type="text" name="time_<%=i%>" value="<%=r.getTime()%>"></td>
+            <td><input type="number" name="laps_<%=i%>" value="<%=r.getLapFinished()%>"></td>
+            <td><input type="number" name="pos_<%=i%>" value="<%=r.getPosition()%>"></td>
+
+            <input type="hidden" name="rid_<%=i%>" value="<%=r.getId()%>">
+        </tr>
+    <% } %>
+
+<% } %>
+
+    </table>
+
+    <div class="actions">
+        <button type="submit" name="action" value="save" class="btn-save">💾 Save Update</button>
+        <a href="views/StaffHome.jsp" class="btn-back">⬅ Back</a>
     </div>
-    <body>
+    </form>
+
+</div>
+</body>
 </html>

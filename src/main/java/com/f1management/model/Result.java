@@ -8,13 +8,15 @@ public class Result {
     private int point;
     private int contractId;        
     private int memberId;         
-
+    private int gpinseasonId;
+    private String driverName;
+    private String teamName;
     public Result(){
         super();
     }
 
     public Result(int id, String time, Integer lapFinished, Integer position, 
-                  int point, int contractId, int memberId) {
+                  int point, int contractId, int memberId, int gpinseasonId) {
         this.id = id;
         this.time = time;
         this.lapFinished = lapFinished;
@@ -22,6 +24,7 @@ public class Result {
         this.point = point;
         this.contractId = contractId;
         this.memberId = memberId;
+        this.gpinseasonId = gpinseasonId;
     }
 
     public int getId() { return id; }
@@ -30,10 +33,10 @@ public class Result {
     public String getTime() { return time; }
     public void setTime(String time) { this.time = time; }
 
-    public Integer getLapFinished() { return lapFinished; }
+    public int getLapFinished() { return lapFinished; }
     public void setLapFinished(Integer lapFinished) { this.lapFinished = lapFinished; }
 
-    public Integer getPosition() { return position; }
+    public int getPosition() { return position; }
     public void setPosition(Integer position) { this.position = position; }
 
     public int getPoint() { return point; }
@@ -44,4 +47,13 @@ public class Result {
 
     public int getMemberId() { return memberId; }
     public void setMemberId(int memberId) { this.memberId = memberId; }
+
+    public int getGPinSeasonId() { return gpinseasonId; }
+    public void setGPinSeasonId(int gpinseasonId) { this.gpinseasonId = gpinseasonId; }
+
+    public String getDriver() { return driverName; }
+    public void setDriver(String driverName) { this.driverName = driverName; }
+
+    public String getTeam() { return teamName; }
+    public void setTeam(String teamName) { this.teamName = teamName; }
 }

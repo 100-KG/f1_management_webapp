@@ -54,6 +54,15 @@ body {
 
 .btn-login,
 .btn-viewRanking {
-    background-color: #c3d8f0; 
-    color: #ffffff;
+    display: block;
+    width: 70%;
+    margin: 15px auto;
+    padding: 12px 0;
+    background-color: #c7d8e8;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #000;
 }

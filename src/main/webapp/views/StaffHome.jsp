@@ -10,12 +10,10 @@
     <body>
         <div class="container">
             <h2>Staff Home</h2>
-            <a class="btn-manage" href="Manage.jsp">Manage</a>
-            <a class="btn-update" href="UpdateResult.jsp">Update result</a>
-            <a class="btn-view" href="ViewRanking.jsp">View ranking</a>
+            
+            <a class="btn-manage" href="views/Manage.jsp">Manage</a>
+            <a href="${pageContext.request.contextPath}/doupdate" class="btn-update">Update Result</a>
+            <a class="btn-view" href="views/ViewRanking.jsp">View ranking</a>
         </div>
     <body>
 </html>
-
-<%
-    if()
